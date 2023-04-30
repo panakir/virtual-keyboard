@@ -29,6 +29,38 @@ class Keyboard {
     return keyboard
   }
 
+  keyDown(event) {
+    event.preventDefault()
+    let key = null
+    if (event.type === 'mousedown') {
+      key = event.target
+      this.current = key
+    } else {
+      key = this.keys.find((elem) => elem.dataset.code === event.code)
+    }
+    if (key && key.classList.contains('key')) {
+      this.pressed.add(key.dataset.code)
+      key.classList.add('press')
+      this.printKey(key)
+    }
+  }
+
+  keyUp(event) {
+    let key = null
+    if (event.type === 'mouseup') {
+      key = this.current
+    } else {
+      key = this.keys.find((elem) => elem.dataset.code === event.code)
+    }
+    key.classList.remove('press')
+    this.pressed.delete(key.dataset.code)
+  }
+
+  printKey(key) {
+    const position = this.area.selectionStart
+    this.area.value += key.textContent
+    this.area.setSelectionRange(position + 1, position + 1)
+  }
 }
 
 export default Keyboard
