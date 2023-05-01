@@ -11,7 +11,8 @@ class Key {
     key.classList.add('key')
     key.textContent = this.value
     key.dataset.code = this.code
-    key.dataset.addition = this.cadditionde
+    key.dataset.addition = this.addition
+    key.dataset.initial = this.value
     if (this.width > 1) {
       key.classList.add(`width-${this.width}`)
     }

@@ -7,7 +7,7 @@ class Keyboard {
     this.area = area
     this.functionalKeyCode = ['Backspace', 'Delete','CapsLock', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'MetaLeft', 'AltLeft', 'AltRight', 'ControlRight']
     this.currentLanguage = language
-    this.pressed = new Set()
+    this.pressedKeys = new Set()
   }
 
   generateKeys() {
@@ -38,9 +38,13 @@ class Keyboard {
       key = this.keys.find((elem) => elem.dataset.code === event.code)
     }
     if (key && key.classList.contains('key')) {
-      this.pressed.add(key.dataset.code)
-      key.classList.add('press')
-      this.printKey(key)
+      this.pressedKeys.add(key.dataset.code)
+      if (this.functionalKeyCode.includes(key.dataset.code)) {
+        this.functionalKeysHandler(key)
+      } else {
+        key.classList.add('press')
+        this.printKey(key)
+      }
     }
   }
 
@@ -51,8 +55,17 @@ class Keyboard {
     } else {
       key = this.keys.find((elem) => elem.dataset.code === event.code)
     }
-    key.classList.remove('press')
-    this.pressed.delete(key.dataset.code)
+    if (key && key.dataset.code !== 'CapsLock') {
+      key.classList.remove('press')
+      if (key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight') {
+        this.shiftUp()
+      }
+      if (this.pressedKeys.has('ControlLeft') && this.pressedKeys.has('AltLeft')) {
+        console.log(this.pressedKeys);
+        this.changeLanguage()
+      }
+    }
+    this.pressedKeys.delete(key.dataset.code)
   }
 
   printKey(key) {
@@ -92,6 +105,74 @@ class Keyboard {
       }
     })
   }
-  
+
+  shiftDown(key) {
+    this.pressedKeys.delete(key.dataset.code)
+    console.log(this.pressedKeys);
+    console.log('shifted');
+    const shiftKeys = this.keys.filter((key) => key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight')
+    if (shiftKeys.some((key) => key.classList.contains('press'))) {
+      return null
+    }
+    key.classList.add('press')
+    this.keys.forEach(key => {
+      if (key.dataset.code.includes('Key') || 'ёхъжэбю'.includes(key.textContent.toLowerCase())) {
+        if (key.textContent === key.textContent.toLowerCase()) {
+          key.textContent = key.textContent.toUpperCase()
+        } else {
+          key.textContent = key.textContent.toLowerCase()
+        }
+      } else if (key.dataset.addition !== 'null') {
+        key.textContent = key.dataset.addition
+      }
+    })
+
+    return 
+  }
+
+  shiftUp() {
+    console.log('unshifted');
+    const shiftKeys = this.keys.filter((key) => key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight')
+    if (shiftKeys.some((key) => key.classList.contains('press'))) {
+      return null
+    }
+    this.keys.forEach(key => {
+      if (key.dataset.code.includes('Key') || 'ёхъжэбю'.includes(key.textContent.toLowerCase())) {
+        if (key.textContent === key.textContent.toLowerCase()) {
+          key.textContent = key.textContent.toUpperCase()
+        } else {
+          key.textContent = key.textContent.toLowerCase()
+        }
+      } else {
+        key.textContent = key.dataset.initial
+      }
+    })
+    
+    return 
+  }
+
+  functionalKeysHandler(key) {
+    switch(key.dataset.code) {
+      case 'Backspace':
+        key.classList.add('press')
+        this.backspaceHandler(this.area.selectionStart)
+        break
+      case 'Delete':
+        key.classList.add('press')
+        this.deleteHandler(this.area.selectionStart)
+        break
+      case 'CapsLock': 
+        this.capslockHandler(key)
+        break
+      case 'ShiftLeft':
+      case 'ShiftRight':
+        this.shiftDown(key)
+      default: 
+      key.classList.add('press')
+    }
+  }
+
+
 }
+
 export default Keyboard
