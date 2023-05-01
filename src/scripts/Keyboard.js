@@ -1,4 +1,4 @@
-import { english, mova } from "./_language.js";
+import { english, mova } from "./language.js";
 import Key from "./Key.js";
 
 class Keyboard {
