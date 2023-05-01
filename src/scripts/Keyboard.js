@@ -93,7 +93,6 @@ class Keyboard {
   }
 
   capslockHandler(key) {
-    console.log('capsed');
     key.classList.toggle('press')
     this.keys.forEach(key => {
       if (key.dataset.code.includes('Key') || 'ёхъжэбю'.includes(key.textContent.toLowerCase())) {
@@ -108,8 +107,6 @@ class Keyboard {
 
   shiftDown(key) {
     this.pressedKeys.delete(key.dataset.code)
-    console.log(this.pressedKeys);
-    console.log('shifted');
     const shiftKeys = this.keys.filter((key) => key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight')
     if (shiftKeys.some((key) => key.classList.contains('press'))) {
       return null
@@ -127,11 +124,10 @@ class Keyboard {
       }
     })
 
-    return 
+    return
   }
 
   shiftUp() {
-    console.log('unshifted');
     const shiftKeys = this.keys.filter((key) => key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight')
     if (shiftKeys.some((key) => key.classList.contains('press'))) {
       return null
@@ -147,8 +143,8 @@ class Keyboard {
         key.textContent = key.dataset.initial
       }
     })
-    
-    return 
+
+    return
   }
 
   functionalKeysHandler(key) {
@@ -161,17 +157,55 @@ class Keyboard {
         key.classList.add('press')
         this.deleteHandler(this.area.selectionStart)
         break
-      case 'CapsLock': 
+      case 'CapsLock':
         this.capslockHandler(key)
         break
       case 'ShiftLeft':
       case 'ShiftRight':
         this.shiftDown(key)
-      default: 
+      default:
       key.classList.add('press')
     }
   }
 
+  changeLanguage() {
+    let languageToChange = []
+    if (this.currentLanguage === 'en') {
+      languageToChange = mova
+      this.currentLanguage = 'by'
+    } else {
+      languageToChange = english
+      this.currentLanguage = 'en'
+    }
+    
+    localStorage.setItem('language', this.currentLanguage)
+
+    let shift
+    let caps
+
+    this.keys.forEach((item, index) => {
+      const prevKeys = item
+      const nextKeys = new Key(...languageToChange[index]).generateKey()
+
+      if ((prevKeys.dataset.code === 'ShiftLeft' || prevKeys.dataset.code === 'ShiftRight') && prevKeys.classList.contains('press')) {
+        shift = nextKeys
+      }
+      if (prevKeys.dataset.code === "CapsLock" && prevKeys.classList.contains('press')) {
+        caps = nextKeys
+      }
+
+      this.keys[this.keys.indexOf(prevKeys)] = nextKeys
+      prevKeys.parentNode.replaceChild(nextKeys, prevKeys)
+    })
+
+    if (shift) {
+      this.shiftDown(shift)
+    }
+    if (caps) {
+      this.capslockHandler(caps)
+    }
+
+  }
 
 }
 
